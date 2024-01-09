@@ -1,5 +1,4 @@
 use crate::hdu;
-
 use std::convert::TryInto;
 use hdu::HDU;
 
