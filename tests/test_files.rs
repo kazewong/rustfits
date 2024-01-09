@@ -8,8 +8,7 @@ fn test_wfpc2() -> io::Result<()> {
     let mut f = File::open("tests/data/WFPC2u5780205r_c0fx.fits")?;
     let mut buffer = Vec::new();
     f.read_to_end(&mut buffer)?;
-    // println!("string: {}", str::from_utf8(&buffer).unwrap());
-    let hdu = parser::bytes_to_hdu(&buffer);
-    println!("hdu: {:?}", hdu);
+    parser::bytes_to_fitsblocks(&buffer);
     Ok(())
+
 }
