@@ -6,10 +6,10 @@ pub struct FITSBlock{
 }
 
 impl FITSBlock{
-    fn new() -> FITSBlock{
+    fn new(header: bool, buffer: [u8; 2880]) -> FITSBlock{
         FITSBlock{
-            header: false,
-            data: [0; 2880],
+            header: header,
+            data: buffer,
         }
     }
 
@@ -24,11 +24,6 @@ impl FITSBlock{
 //     Extension="XTENSION",
 // }
 
-fn check_end(){
-
-}
-
-
 pub fn bytes_to_fitsblocks(buffer: &Vec<u8>) -> Vec<FITSBlock> {
     let n_chunks = buffer.len() / 2880;
     let mut header = Vec::new();
@@ -37,7 +32,7 @@ pub fn bytes_to_fitsblocks(buffer: &Vec<u8>) -> Vec<FITSBlock> {
         let start = i * 2880;
         let end = start + 2880;
         let chunk: [u8; 2880] = buffer[start..end].try_into().expect("slice with incorrect length");
-        let chunk = str::from_utf8(&chunk).unwrap().to_string();
+        let fitsblock = FITSBlock::new(false, chunk);
         
     }
     header
