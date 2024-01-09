@@ -1,28 +1,13 @@
-use std::{str, array, convert::TryInto};
+use std::{str, convert::TryInto, fs::read, env::current_exe};
 
-pub struct FITSBlock{
-    header: bool,
-    data: [u8; 2880],
+pub struct HDU{
+    header: Vec<[u8; 2880]>,
+    data: Vec<[u8; 2880]>
 }
 
-impl FITSBlock{
-    fn new(header: bool, buffer: [u8; 2880]) -> FITSBlock{
-        FITSBlock{
-            header: header,
-            data: buffer,
-        }
-    }
-
-    // fn header_block(&self) -> [[u8; 80]; 36]{
-    //     self.header = true;
-    //     self.data = block;
-    // }
+impl HDU{
+    
 }
-
-// enum start{
-//     Header="SIMPLE",
-//     Extension="XTENSION",
-// }
 
 fn check_header_beginning(chunk: [u8; 2880]) -> bool{
     let mut result = false;
@@ -43,17 +28,34 @@ fn check_end(chunks: [u8; 2880]) -> bool{
     end
 }
 
-pub fn bytes_to_fitsblocks(buffer: &Vec<u8>) {//-> Vec<FITSBlock> {
+pub fn bytes_to_hdu(buffer: &Vec<u8>) -> Vec<HDU>{
     let n_chunks = buffer.len() / 2880;
+    let mut read_header = false;
+    let mut hdus: Vec<HDU> = Vec::new();
+    let mut current_hdu: HDU = HDU{header: Vec::new(), data: Vec::new()};
     for i in 0..n_chunks {
         let start = i * 2880;
         let end = start + 2880;
-
         let chunk: [u8; 2880] = buffer[start..end].try_into().expect("slice with incorrect length");
-        println!("Is header beginning: {:?}", check_header_beginning(chunk));
-        println!("Is header end: {:?}", check_end(chunk));
-        // let chunk = str::from_utf8(&chunk).unwrap().to_string();
-        
+        if check_header_beginning(chunk) == true{
+            read_header = true;
+            if current_hdu.header.len() > 0{
+                hdus.push(current_hdu);
+                current_hdu = HDU{header: Vec::new(), data: Vec::new()};
+            }
+        }
+        if read_header == true{
+            current_hdu.header.push(chunk);
+            if !check_end(chunk){
+                read_header = false;
+            }
+        }else{
+            current_hdu.data.push(chunk);
+        }
+        if i == n_chunks - 1{
+            hdus.push(current_hdu);
+            break;
+        }
     }
-    // header
+    hdus
 }
