@@ -1,4 +1,4 @@
-use std::{str, convert::TryInto, fs::read, env::current_exe};
+use std::{str, convert::TryInto};
 
 pub struct HDU{
     header: Vec<[u8; 2880]>,
@@ -6,7 +6,18 @@ pub struct HDU{
 }
 
 impl HDU{
-    
+
+    fn print_fitblock(block: [u8; 2880]){
+        for i in 0..36{
+            println!("{}", str::from_utf8(&block[i*80..(i+1)*80]).unwrap());
+        }
+    }
+
+    pub fn print_header(&self){
+        for i in 0..self.header.len(){
+            HDU::print_fitblock(self.header[i]);
+        }
+    }
 }
 
 fn check_header_beginning(chunk: [u8; 2880]) -> bool{
