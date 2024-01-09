@@ -1,24 +1,7 @@
-use std::{str, convert::TryInto};
+use crate::hdu;
 
-pub struct HDU{
-    header: Vec<[u8; 2880]>,
-    data: Vec<[u8; 2880]>
-}
-
-impl HDU{
-
-    fn print_fitblock(block: [u8; 2880]){
-        for i in 0..36{
-            println!("{}", str::from_utf8(&block[i*80..(i+1)*80]).unwrap());
-        }
-    }
-
-    pub fn print_header(&self){
-        for i in 0..self.header.len(){
-            HDU::print_fitblock(self.header[i]);
-        }
-    }
-}
+use std::convert::TryInto;
+use hdu::HDU;
 
 fn check_header_beginning(chunk: [u8; 2880]) -> bool{
     let mut result = false;
