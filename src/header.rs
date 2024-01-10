@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::str;
 
+#[derive(Debug)]
 pub struct Header {
     data: Vec<[u8; 2880]>,
     header_type: HeaderType,
@@ -27,6 +28,7 @@ impl Header {
                 self.keywords.insert(keyword, value);
             }
         }
+        self.header_type = self.check_type();
     }
 
     pub fn append(&mut self, chunk: [u8; 2880]) {
@@ -35,6 +37,38 @@ impl Header {
 
     pub fn is_empty(&self) -> bool {
         self.data.len() == 0
+    }
+
+    pub fn get_header_type(&self) -> Option<Header> {
+        match self.header_type {
+            HeaderType::Primary => Some(Header::new()),
+            HeaderType::Conforming => Some(Header::new()),
+            HeaderType::Image => Some(Header::new()),
+            HeaderType::ASCIITable => Some(Header::new()),
+            HeaderType::BinaryTable => Some(Header::new()),
+            HeaderType::CompressImage => Some(Header::new()),
+            HeaderType::CompressTable => Some(Header::new()),
+            HeaderType::RandomGroup => Some(Header::new()),
+        }
+    }
+
+    pub fn print(&self) {
+        for i in 0..self.data.len() {
+            println!("{}", str::from_utf8(&self.data[i]).unwrap());
+        }
+    }
+
+    pub fn list_keywords(&self) {
+        for (key, value) in &self.keywords {
+            println!("{}: {}", key, value[0]);
+        }
+    }
+
+    pub fn get_keyword(&self, keyword: &str) -> Option<String> {
+        match self.keywords.get(keyword) {
+            Some(value) => Some(value[0].to_string()),
+            None => Some("Field not found".to_string()),
+        }
     }
 
     fn parse_line(buffer: &[u8]) -> (String, [String; 2]) {
@@ -59,27 +93,30 @@ impl Header {
         }
     }
 
-    pub fn print(&self) {
-        for i in 0..self.data.len() {
-            println!("{}", str::from_utf8(&self.data[i]).unwrap());
+    fn check_type(&self) -> HeaderType {
+        if self.initiailzed == false {
+            panic!("Header not initialized");
         }
-    }
-
-    pub fn list_keywords(&self) {
-        for (key, value) in &self.keywords {
-            println!("{}: {}", key, value[0]);
-        }
-    }
-
-    pub fn get_keyword(&self, keyword: &str) -> Option<String> {
-        match self.keywords.get(keyword) {
-            Some(value) => Some(value[0].to_string()),
-            None => Some("Field not found".to_string()),
+        if self.keywords.contains_key("SIMPLE") {
+            return HeaderType::Primary;
+        } else if self.keywords.contains_key("XTENSION") {
+            match self.keywords.get("XTENSION").unwrap()[0].as_str() {
+                "IMAGE" => return HeaderType::Image,
+                "BINTABLE" => return HeaderType::BinaryTable,
+                "TABLE" => return HeaderType::ASCIITable,
+                _ => panic!(
+                    "Invalid XTENSION value {:?}. Only standard extension is supported for now",
+                    self.keywords.get("XTENSION").unwrap()[0]
+                ),
+            }
+        } else {
+            panic!("Invalid header type");
         }
     }
 }
 
-enum HeaderType {
+#[derive(Debug)]
+pub enum HeaderType {
     Primary,
     Conforming,
     Image,

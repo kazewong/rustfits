@@ -13,6 +13,7 @@ fn test_wfpc2() -> io::Result<()> {
         hdus[i].header.initialize_header();
     }
     for i in 0..hdus.len() {
+        println!("HDU type: {:?}", hdus[i].header.get_header_type().unwrap());
         println!(
             "Keyword: NAXIS Value: {}\n",
             hdus[i].header.get_keyword("NAXIS").unwrap()
