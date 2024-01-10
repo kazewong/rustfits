@@ -23,9 +23,12 @@ fn test_euv() -> io::Result<()> {
     let mut f = File::open("tests/data/EUVEngc4151imgx.fits")?;
     let mut buffer = Vec::new();
     f.read_to_end(&mut buffer)?;
-    let hdus = parser::bytes_to_hdu(&buffer);
+    let mut hdus = parser::bytes_to_hdu(&buffer);
     for i in 0..hdus.len(){
-        hdus[i].header.print();
+        hdus[i].header.initialize_header();
+    }
+    for i in 0..hdus.len(){
+        println!("Keyword: NAXIS Value: {}\n", hdus[i].header.get_keyword("NAXIS").unwrap());
     }
     Ok(())
 }

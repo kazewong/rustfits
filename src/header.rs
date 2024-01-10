@@ -5,7 +5,7 @@ pub struct Header{
     data: Vec<[u8; 2880]>,
     header_type: HeaderType,
     initiailzed: bool,
-    keywords: HashMap<String, String>,
+    keywords: HashMap<String, [String; 2]>,
 }
 
 impl Header{
@@ -19,9 +19,7 @@ impl Header{
         for i in 0..self.data.len(){
             let chunk = &self.data[i];
             for j in 0..36{
-                let (mut keyword, mut value) = Header::parse_line(&chunk[j*80..(j+1)*80]);
-                keyword.retain(|c| !c.is_whitespace());
-                value.retain(|c| !c.is_whitespace());
+                let (keyword, value) = Header::parse_line(&chunk[j*80..(j+1)*80]);
                 self.keywords.insert(keyword, value);    
             }
         }
@@ -35,14 +33,25 @@ impl Header{
         self.data.len() == 0
     }
 
-    fn parse_line(buffer: &[u8]) -> (String, String){
-        let keyword = String::from(str::from_utf8(&buffer[0..8]).unwrap());
-        if buffer[9..11] == [61, 32]{
+    fn parse_line(buffer: &[u8]) -> (String, [String; 2]){
+        let mut keyword = String::from(str::from_utf8(&buffer[0..8]).unwrap());
+        keyword.retain(|c| !c.is_whitespace());
+        if buffer[8..10] == [61, 32]{
             let value = String::from(str::from_utf8(&buffer[11..80]).unwrap());
-            (keyword, value)
+            let parts = value.split("/").collect::<Vec<&str>>();
+            if parts.len() == 2{
+                let comment = String::from(parts[1]);
+                let mut value = String::from(parts[0]);
+                value.retain(|c| !c.is_whitespace());
+                (keyword, [value, comment])
+            }else{
+                let mut value = String::from(parts[0]);
+                value.retain(|c| !c.is_whitespace());
+                (keyword, [value, String::from("")])
+            }
         }else{
             let value = String::from(str::from_utf8(&buffer[9..80]).unwrap());
-            (keyword, value)
+            (keyword, [String::from(""), value])
         }
     }
 
@@ -54,13 +63,13 @@ impl Header{
 
     pub fn list_keywords(&self){
         for (key, value) in &self.keywords{
-            println!("{}: {}", key, value);
+            println!("{}: {}", key, value[0]);
         }
     }
 
     pub fn get_keyword(&self, keyword: &str) -> Option<String>{
         match self.keywords.get(keyword){
-            Some(value) => Some(value.to_string()),
+            Some(value) => Some(value[0].to_string()),
             None => Some("Field not found".to_string()),
         }
     }

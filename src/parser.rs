@@ -28,7 +28,6 @@ fn check_end(chunks: [u8; 2880]) -> bool{
 pub fn bytes_to_hdu(buffer: &Vec<u8>) -> Vec<HDU>{
     let n_chunks = buffer.len() / 2880;
     let mut read_header = false;
-    let mut read_data = false;
     let mut hdus: Vec<HDU> = Vec::new();
     let mut current_hdu: HDU = HDU{header: Header::new(), data: Data::new()};
     for i in 0..n_chunks {
