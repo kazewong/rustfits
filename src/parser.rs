@@ -1,6 +1,9 @@
 use crate::hdu;
+use crate::header;
+
 use std::convert::TryInto;
-use hdu::{HDU, Header, Data};
+use hdu::{HDU, Data};
+use header::Header;
 
 fn check_header_beginning(chunk: [u8; 2880]) -> bool{
     let mut result = false;
@@ -25,6 +28,7 @@ fn check_end(chunks: [u8; 2880]) -> bool{
 pub fn bytes_to_hdu(buffer: &Vec<u8>) -> Vec<HDU>{
     let n_chunks = buffer.len() / 2880;
     let mut read_header = false;
+    let mut read_data = false;
     let mut hdus: Vec<HDU> = Vec::new();
     let mut current_hdu: HDU = HDU{header: Header::new(), data: Data::new()};
     for i in 0..n_chunks {
@@ -33,14 +37,14 @@ pub fn bytes_to_hdu(buffer: &Vec<u8>) -> Vec<HDU>{
         let chunk: [u8; 2880] = buffer[start..end].try_into().expect("slice with incorrect length");
         if check_header_beginning(chunk) == true{
             read_header = true;
-            if current_hdu.header.is_empty(){
+            if !current_hdu.header.is_empty(){
                 hdus.push(current_hdu);
                 current_hdu = HDU{header: Header::new(), data: Data::new()};
             }
         }
         if read_header == true{
             current_hdu.header.append(chunk);
-            if !check_end(chunk){
+            if check_end(chunk){
                 read_header = false;
             }
         }else{

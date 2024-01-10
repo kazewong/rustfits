@@ -1,35 +1,4 @@
-use std::str;
-use std::collections::HashMap;
-
-enum Keywords{
-
-}
-
-pub struct Header{
-    data: Vec<[u8; 2880]>,
-}
-
-impl Header{
-    
-    pub fn new() -> Header{
-        Header{data: Vec::new()}
-    }
-
-    fn print(&self){
-        for i in 0..self.data.len(){
-            println!("{}", str::from_utf8(&self.data[i]).unwrap());
-        }
-    }
-
-    pub fn append(&mut self, chunk: [u8; 2880]){
-        self.data.push(chunk);
-    }
-
-    pub fn is_empty(&self) -> bool{
-        self.data.len() == 0
-    }
-
-}
+use crate::header::Header;
 
 enum Precision{
     U8,
@@ -68,10 +37,5 @@ pub struct HDU{
 
 impl HDU{
 
-    fn print_fitblock(block: [u8; 2880]){
-        for i in 0..36{
-            println!("{}", str::from_utf8(&block[i*80..(i+1)*80]).unwrap());
-        }
-    }
 
 }
