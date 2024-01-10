@@ -1,7 +1,39 @@
 use std::str;
+
+struct Header{
+    data: Vec<[u8; 2880]>,
+
+}
+
+impl Header{
+    fn print(&self){
+        for i in 0..self.data.len(){
+            println!("{}", str::from_utf8(&self.data[i]).unwrap());
+        }
+    }
+
+}
+
+enum Precision{
+    U8,
+    I16,
+    I32,
+    SINGLE,
+    DOUBLE,
+}
+
+struct Data{
+    data: Vec<[u8; 2880]>,
+    bitpix: Precision,
+    naxis: u8,
+    pcount: u32,
+    gcount: u32,
+
+}
+
 pub struct HDU{
-    pub header: Vec<[u8; 2880]>,
-    pub data: Vec<[u8; 2880]>
+    pub header: Header,
+    pub data: Data
 }
 
 impl HDU{
@@ -12,9 +44,4 @@ impl HDU{
         }
     }
 
-    pub fn print_header(&self){
-        for i in 0..self.header.len(){
-            HDU::print_fitblock(self.header[i]);
-        }
-    }
 }
