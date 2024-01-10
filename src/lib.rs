@@ -1,4 +1,4 @@
-mod utils;
-pub mod parser;
 mod hdu;
 mod header;
+pub mod parser;
+mod utils;
