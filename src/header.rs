@@ -80,11 +80,11 @@ impl Header {
             if parts.len() == 2 {
                 let comment = String::from(parts[1]);
                 let mut value = String::from(parts[0]);
-                value.retain(|c| !c.is_whitespace());
+                value.retain(|c| !c.is_whitespace() && c != '\'');
                 (keyword, [value, comment])
             } else {
                 let mut value = String::from(parts[0]);
-                value.retain(|c| !c.is_whitespace());
+                value.retain(|c| !c.is_whitespace() && c != '\'');
                 (keyword, [value, String::from("")])
             }
         } else {
