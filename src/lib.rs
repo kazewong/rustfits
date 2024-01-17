@@ -1,4 +1,10 @@
 mod hdu;
 mod header;
-pub mod parser;
+mod data;
 mod utils;
+pub mod parser;
+
+
+struct Fits{
+    hdus: Vec<hdu::HDU>,
+}

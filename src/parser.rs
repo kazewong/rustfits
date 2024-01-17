@@ -1,5 +1,6 @@
 use crate::hdu;
 use crate::header;
+use crate::data;
 
 use hdu::{Data, HDU};
 use header::Header;
