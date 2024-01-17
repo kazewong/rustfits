@@ -6,4 +6,3 @@ pub struct HDU {
     pub data: Data,
 }
 
-impl HDU {}

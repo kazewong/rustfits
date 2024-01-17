@@ -2,8 +2,9 @@ use crate::hdu;
 use crate::header;
 use crate::data;
 
-use hdu::{Data, HDU};
+use hdu::HDU;
 use header::Header;
+use data::Data;
 use std::convert::TryInto;
 
 fn check_header_beginning(chunk: [u8; 2880]) -> bool {
