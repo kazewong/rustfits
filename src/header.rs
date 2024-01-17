@@ -42,13 +42,10 @@ impl Header {
     pub fn get_header_type(&self) -> Option<Header> {
         match self.header_type {
             HeaderType::Primary => Some(Header::new()),
-            HeaderType::Conforming => Some(Header::new()),
             HeaderType::Image => Some(Header::new()),
             HeaderType::ASCIITable => Some(Header::new()),
             HeaderType::BinaryTable => Some(Header::new()),
-            HeaderType::CompressImage => Some(Header::new()),
-            HeaderType::CompressTable => Some(Header::new()),
-            HeaderType::RandomGroup => Some(Header::new()),
+
         }
     }
 
@@ -118,11 +115,7 @@ impl Header {
 #[derive(Debug)]
 pub enum HeaderType {
     Primary,
-    Conforming,
     Image,
     ASCIITable,
     BinaryTable,
-    CompressImage,
-    CompressTable,
-    RandomGroup,
 }
