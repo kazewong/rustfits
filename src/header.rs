@@ -3,7 +3,7 @@ use std::str;
 
 #[derive(Debug)]
 pub struct Header {
-    data: Vec<[u8; 2880]>,
+    fitsblocks: Vec<[u8; 2880]>,
     header_type: HeaderType,
     initiailzed: bool,
     keywords: HashMap<String, [String; 2]>,
@@ -12,7 +12,7 @@ pub struct Header {
 impl Header {
     pub fn new() -> Header {
         Header {
-            data: Vec::new(),
+            fitsblocks: Vec::new(),
             header_type: HeaderType::Primary,
             initiailzed: false,
             keywords: HashMap::new(),
@@ -21,8 +21,8 @@ impl Header {
 
     pub fn initialize_header(&mut self) {
         self.initiailzed = true;
-        for i in 0..self.data.len() {
-            let chunk = &self.data[i];
+        for i in 0..self.fitsblocks.len() {
+            let chunk = &self.fitsblocks[i];
             for j in 0..36 {
                 let (keyword, value) = Header::parse_line(&chunk[j * 80..(j + 1) * 80]);
                 self.keywords.insert(keyword, value);
@@ -32,11 +32,11 @@ impl Header {
     }
 
     pub fn append(&mut self, chunk: [u8; 2880]) {
-        self.data.push(chunk);
+        self.fitsblocks.push(chunk);
     }
 
     pub fn is_empty(&self) -> bool {
-        self.data.len() == 0
+        self.fitsblocks.len() == 0
     }
 
     pub fn get_header_type(&self) -> Option<Header> {
@@ -53,8 +53,8 @@ impl Header {
     }
 
     pub fn print(&self) {
-        for i in 0..self.data.len() {
-            println!("{}", str::from_utf8(&self.data[i]).unwrap());
+        for i in 0..self.fitsblocks.len() {
+            println!("{}", str::from_utf8(&self.fitsblocks[i]).unwrap());
         }
     }
 
