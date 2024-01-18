@@ -1,13 +1,17 @@
-pub struct Primary{
+use crate::header;
+
+use header::{Header, HeaderType};
+
+pub struct Primary {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
     naxis: u8,
     naxisn: Vec<u32>,
 }
 
-impl Primary{
-    pub fn new() -> Primary{
-        Primary{
+impl Primary {
+    pub fn new() -> Primary {
+        Primary {
             fitsblocks: Vec::new(),
             bitpix: 0,
             naxis: 0,
@@ -16,7 +20,7 @@ impl Primary{
     }
 }
 
-pub struct Image{
+pub struct Image {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
     naxis: u8,
@@ -25,20 +29,31 @@ pub struct Image{
     gcount: u32,
 }
 
-impl Image{
-    pub fn new() -> Image{
-        Image{
-            fitsblocks: Vec::new(),
-            bitpix: 0,
-            naxis: 0,
-            naxisn: Vec::new(),
+impl Image {
+    pub fn new(fitsblocks: Vec<[u8; 2880]>, header: &Header) -> Image {
+        let bitpix = header.get_keyword("BITPIX").unwrap().parse::<u8>().unwrap();
+        let naxis = header.get_keyword("NAXIS").unwrap().parse::<u8>().unwrap();
+        let mut naxisn: Vec<u32> = Vec::new();
+        for i in 1..=naxis {
+            let naxisn_i = header
+                .get_keyword(&format!("NAXIS{}", i))
+                .unwrap()
+                .parse::<u32>()
+                .unwrap();
+            naxisn.push(naxisn_i);
+        }
+        Image {
+            fitsblocks,
+            bitpix: bitpix,
+            naxis: naxis,
+            naxisn: naxisn,
             pcount: 0,
             gcount: 1,
         }
     }
 }
 
-pub struct ASCIITable{
+pub struct ASCIITable {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
     naxis: u8,
@@ -50,9 +65,9 @@ pub struct ASCIITable{
     tbcoln: Vec<u32>,
 }
 
-impl ASCIITable{
-    pub fn new() -> ASCIITable{
-        ASCIITable{
+impl ASCIITable {
+    pub fn new() -> ASCIITable {
+        ASCIITable {
             fitsblocks: Vec::new(),
             bitpix: 8,
             naxis: 2,
@@ -66,7 +81,7 @@ impl ASCIITable{
     }
 }
 
-pub struct BinaryTable{
+pub struct BinaryTable {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
     naxis: u8,
@@ -77,9 +92,9 @@ pub struct BinaryTable{
     tformn: Vec<String>,
 }
 
-impl BinaryTable{
-    pub fn new() -> BinaryTable{
-        BinaryTable{
+impl BinaryTable {
+    pub fn new() -> BinaryTable {
+        BinaryTable {
             fitsblocks: Vec::new(),
             bitpix: 8,
             naxis: 2,
@@ -92,30 +107,34 @@ impl BinaryTable{
     }
 }
 
-
-pub enum Data{
+pub enum Data {
     Primary(Primary),
     Image(Image),
     ASCIITable(ASCIITable),
     BinaryTable(BinaryTable),
 }
 
-impl Data{
-    pub fn new(&self) -> Data{
-        match self{
-            Data::Primary(primary) => Data::Primary(Primary::new()),
-            Data::Image(image) => Data::Image(Image::new()),
-            Data::ASCIITable(ascii_table) => Data::ASCIITable(ASCIITable::new()),
-            Data::BinaryTable(binary_table) => Data::BinaryTable(BinaryTable::new()),
-        }
+impl Data {
+    pub fn new() -> Data {
+        Data::Primary(Primary::new())
     }
 
-    pub fn append(&mut self, chunk: [u8; 2880]){
-        match self{
+    pub fn append(&mut self, chunk: [u8; 2880]) {
+        match self {
             Data::Primary(primary) => primary.fitsblocks.push(chunk),
             Data::Image(image) => image.fitsblocks.push(chunk),
             Data::ASCIITable(ascii_table) => ascii_table.fitsblocks.push(chunk),
             Data::BinaryTable(binary_table) => binary_table.fitsblocks.push(chunk),
+        }
+    }
+
+    pub fn from_header(fitsblocks: Vec<[u8; 2880]>, header: &Header) -> Data {
+        let header_type = header.get_header_type().unwrap();
+        match header_type {
+            header::HeaderType::Primary => Data::Primary(Primary::new()),
+            header::HeaderType::Image => Data::Image(Image::new(fitsblocks, header)),
+            header::HeaderType::ASCIITable => Data::ASCIITable(ASCIITable::new()),
+            header::HeaderType::BinaryTable => Data::BinaryTable(BinaryTable::new()),
         }
     }
 }
