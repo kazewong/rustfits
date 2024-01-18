@@ -1,4 +1,4 @@
-use rustfits::hdu::{HDU, FITS};
+use rustfits::fits::{HDU, FITS};
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;

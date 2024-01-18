@@ -1,4 +1,4 @@
-pub mod hdu;
+pub mod fits;
 mod header;
 mod data;
 mod utils;
