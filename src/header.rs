@@ -39,14 +39,8 @@ impl Header {
         self.fitsblocks.len() == 0
     }
 
-    pub fn get_header_type(&self) -> Option<Header> {
-        match self.header_type {
-            HeaderType::Primary => Some(Header::new()),
-            HeaderType::Image => Some(Header::new()),
-            HeaderType::ASCIITable => Some(Header::new()),
-            HeaderType::BinaryTable => Some(Header::new()),
-
-        }
+    pub fn get_header_type(&self) -> HeaderType {
+        self.header_type
     }
 
     pub fn print(&self) {
@@ -112,7 +106,7 @@ impl Header {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum HeaderType {
     Primary,
     Image,

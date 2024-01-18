@@ -1,7 +1,9 @@
 use crate::header;
 
-use header::{Header, HeaderType};
+use header::Header;
 
+
+#[derive(Debug)]
 pub struct Primary {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
@@ -20,6 +22,7 @@ impl Primary {
     }
 }
 
+#[derive(Debug)]
 pub struct Image {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
@@ -30,7 +33,7 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn new(fitsblocks: Vec<[u8; 2880]>, header: &Header) -> Image {
+    pub fn new(fitsblocks: &Vec<[u8; 2880]>, header: &Header) -> Image {
         let bitpix = header.get_keyword("BITPIX").unwrap().parse::<u8>().unwrap();
         let naxis = header.get_keyword("NAXIS").unwrap().parse::<u8>().unwrap();
         let mut naxisn: Vec<u32> = Vec::new();
@@ -43,7 +46,7 @@ impl Image {
             naxisn.push(naxisn_i);
         }
         Image {
-            fitsblocks,
+            fitsblocks: fitsblocks.to_vec(),
             bitpix: bitpix,
             naxis: naxis,
             naxisn: naxisn,
@@ -53,6 +56,7 @@ impl Image {
     }
 }
 
+#[derive(Debug)]
 pub struct ASCIITable {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
@@ -81,6 +85,7 @@ impl ASCIITable {
     }
 }
 
+#[derive(Debug)]
 pub struct BinaryTable {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: u8,
@@ -107,6 +112,7 @@ impl BinaryTable {
     }
 }
 
+#[derive(Debug)]
 pub enum Data {
     Primary(Primary),
     Image(Image),
@@ -128,8 +134,8 @@ impl Data {
         }
     }
 
-    pub fn from_header(fitsblocks: Vec<[u8; 2880]>, header: &Header) -> Data {
-        let header_type = header.get_header_type().unwrap();
+    pub fn from_header(fitsblocks: &Vec<[u8; 2880]>, header: &Header) -> Data {
+        let header_type = header.get_header_type();
         match header_type {
             header::HeaderType::Primary => Data::Primary(Primary::new()),
             header::HeaderType::Image => Data::Image(Image::new(fitsblocks, header)),
@@ -137,4 +143,14 @@ impl Data {
             header::HeaderType::BinaryTable => Data::BinaryTable(BinaryTable::new()),
         }
     }
+
+    pub fn get_fitsblocks(&self) -> &Vec<[u8; 2880]> {
+        match self {
+            Data::Primary(primary) => &primary.fitsblocks,
+            Data::Image(image) => &image.fitsblocks,
+            Data::ASCIITable(ascii_table) => &ascii_table.fitsblocks,
+            Data::BinaryTable(binary_table) => &binary_table.fitsblocks,
+        }
+    }
+
 }
