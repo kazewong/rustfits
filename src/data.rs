@@ -60,6 +60,8 @@ impl Image {
     pub fn n_bits(&self) -> u32 {
         (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
     }
+
+    // pub fn to_image
 }
 
 #[derive(Debug)]
