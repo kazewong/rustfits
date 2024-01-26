@@ -4,6 +4,68 @@ use crate::{fits, header};
 use header::Header;
 use byteorder::{BigEndian, ByteOrder};
 
+trait FitblockConversion {
+    fn convert_fitsblocks_to_i16(fitsblocks: Vec<[u8; 2880]>) -> Vec<[i16; 1440]>  {
+        let mut result: Vec<[i16; 1440]> = Vec::new();
+        for i in 0..fitsblocks.len() {
+            let mut fitsblock: [i16; 1440] = [0; 1440];
+            for j in 0..1440 {
+                fitsblock[j] = BigEndian::read_i16(&fitsblocks[i][j*2..(j+1)*2]);
+            }
+            result.push(fitsblock);
+        }
+        result
+    }
+
+    fn convert_fitsblocks_to_i32(fitsblocks: Vec<[u8; 2880]>) -> Vec<[i32; 720]>  {
+        let mut result: Vec<[i32; 720]> = Vec::new();
+        for i in 0..fitsblocks.len() {
+            let mut fitsblock: [i32; 720] = [0; 720];
+            for j in 0..720 {
+                fitsblock[j] = BigEndian::read_i32(&fitsblocks[i][j*4..(j+1)*4]);
+            }
+            result.push(fitsblock);
+        }
+        result
+    }
+
+    fn convert_fitsblocks_to_i64(fitsblocks: Vec<[u8; 2880]>) -> Vec<[i64; 360]>  {
+        let mut result: Vec<[i64; 360]> = Vec::new();
+        for i in 0..fitsblocks.len() {
+            let mut fitsblock: [i64; 360] = [0; 360];
+            for j in 0..360 {
+                fitsblock[j] = BigEndian::read_i64(&fitsblocks[i][j*8..(j+1)*8]);
+            }
+            result.push(fitsblock);
+        }
+        result
+    }
+
+    fn convert_fitsblocks_to_f32(fitsblocks: Vec<[u8; 2880]>) -> Vec<[f32; 720]>  {
+        let mut result: Vec<[f32; 720]> = Vec::new();
+        for i in 0..fitsblocks.len() {
+            let mut fitsblock: [f32; 720] = [0.0; 720];
+            for j in 0..720 {
+                fitsblock[j] = BigEndian::read_f32(&fitsblocks[i][j*4..(j+1)*4]);
+            }
+            result.push(fitsblock);
+        }
+        result
+    }
+
+    fn convert_fitsblocks_to_f64(fitsblocks: Vec<[u8; 2880]>) -> Vec<[f64; 360]>  {
+        let mut result: Vec<[f64; 360]> = Vec::new();
+        for i in 0..fitsblocks.len() {
+            let mut fitsblock: [f64; 360] = [0.0; 360];
+            for j in 0..360 {
+                fitsblock[j] = BigEndian::read_f64(&fitsblocks[i][j*8..(j+1)*8]);
+            }
+            result.push(fitsblock);
+        }
+        result
+    }
+}
+
 #[derive(Debug)]
 pub struct Primary {
     fitsblocks: Vec<[u8; 2880]>,
@@ -62,19 +124,6 @@ impl Image {
 
     pub fn n_bits(&self) -> u32 {
         (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
-    }
-
-    pub fn convert_fitsblocks(&self) -> Vec<[i16; 1440]>{
-        let mut result: Vec<[i16; 1440]> = Vec::new();
-        let fitsblocks = self.fitsblocks.to_vec();
-        for i in 0..fitsblocks.len() {
-            let mut fitsblock: [i16; 1440] = [0; 1440];
-            for j in 0..1440 {
-                fitsblock[j] = BigEndian::read_i16(&fitsblocks[i][j*2..(j+1)*2]);
-            }
-            result.push(fitsblock);
-        }
-        result
     }
 
     // pub fn to_image
