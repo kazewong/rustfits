@@ -4,7 +4,27 @@ use crate::{fits, header};
 use header::Header;
 use byteorder::{BigEndian, ByteOrder};
 
-trait FitblockConversion {
+enum Precision{
+    U8(Vec<[u8; 2880]>),
+    I16(Vec<[i16; 1440]>),
+    I32(Vec<[i32; 720]>),
+    I64(Vec<[i64; 360]>),
+    F32(Vec<[f32; 720]>),
+    F64(Vec<[f64; 360]>),
+}
+impl Precision {
+
+    fn convert_fitsblocks(fitsblocks: Vec<[u8; 2880]>, precision: Precision) -> Precision {
+        match precision {
+            Precision::U8(_) => Precision::U8(fitsblocks),
+            Precision::I16(_) => Precision::I16(Precision::convert_fitsblocks_to_i16(fitsblocks)),
+            Precision::I32(_) => Precision::I32(Precision::convert_fitsblocks_to_i32(fitsblocks)),
+            Precision::I64(_) => Precision::I64(Precision::convert_fitsblocks_to_i64(fitsblocks)),
+            Precision::F32(_) => Precision::F32(Precision::convert_fitsblocks_to_f32(fitsblocks)),
+            Precision::F64(_) => Precision::F64(Precision::convert_fitsblocks_to_f64(fitsblocks)),
+        }
+    }
+
     fn convert_fitsblocks_to_i16(fitsblocks: Vec<[u8; 2880]>) -> Vec<[i16; 1440]>  {
         let mut result: Vec<[i16; 1440]> = Vec::new();
         for i in 0..fitsblocks.len() {
@@ -86,6 +106,21 @@ impl Primary {
 
     pub fn n_bits(&self) -> u32 {
         (self.bitpix.abs() as u32)*(self.naxisn.iter().product::<u32>())
+    }
+
+    pub fn convert_fitsblocks(&self) -> Precision {
+        let mut fitsblocks: Vec<[u8; 2880]> = self.fitsblocks.to_vec();
+        let mut precision: Precision = match self.bitpix {
+            8 => Precision::U8(Vec::new()),
+            16 => Precision::I16(Vec::new()),
+            32 => Precision::I32(Vec::new()),
+            64 => Precision::I64(Vec::new()),
+            -32 => Precision::F32(Vec::new()),
+            -64 => Precision::F64(Vec::new()),
+            _ => Precision::U8(Vec::new()),
+        };
+        precision = Precision::convert_fitsblocks(fitsblocks, precision);
+        precision
     }
 }
 
