@@ -1,5 +1,8 @@
-use crate::header;
+use std::u8;
+
+use crate::{fits, header};
 use header::Header;
+use byteorder::{BigEndian, ByteOrder};
 
 #[derive(Debug)]
 pub struct Primary {
@@ -59,6 +62,19 @@ impl Image {
 
     pub fn n_bits(&self) -> u32 {
         (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
+    }
+
+    pub fn convert_fitsblocks(&self) -> Vec<[i16; 1440]>{
+        let mut result: Vec<[i16; 1440]> = Vec::new();
+        let fitsblocks = self.fitsblocks.to_vec();
+        for i in 0..fitsblocks.len() {
+            let mut fitsblock: [i16; 1440] = [0; 1440];
+            for j in 0..1440 {
+                fitsblock[j] = BigEndian::read_i16(&fitsblocks[i][j*2..(j+1)*2]);
+            }
+            result.push(fitsblock);
+        }
+        result
     }
 
     // pub fn to_image
@@ -221,4 +237,14 @@ impl Data {
             Data::BinaryTable(binary_table) => &binary_table.fitsblocks,
         }
     }
+
+    pub fn convert_fitsblocks(&self) -> Vec<[i16; 1440]>{
+        match self {
+            Data::Primary(_) => Vec::new(),
+            Data::Image(image) => image.convert_fitsblocks(),
+            Data::ASCIITable(_) => Vec::new(),
+            Data::BinaryTable(_) => Vec::new(),
+        }
+    }
+
 }

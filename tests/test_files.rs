@@ -11,12 +11,12 @@ fn test_wfpc2() -> io::Result<()> {
     let fits = FITS::new_from_buffer(&buffer);
     for i in 0..fits.hdus.len() {
         println!("HDU type: {:?}", fits.hdus[i].header.get_header_type());
-        // hdus[i].header.list_keywords();
         println!(
             "Keyword: NAXIS Value: {}",
             fits.hdus[i].header.get_keyword("NAXIS").unwrap()
         );
         println!("Data: {:?}\n",fits.hdus[i].data);
+        fits.hdus[i].data.convert_fitsblocks();
     }
     Ok(())
 }
