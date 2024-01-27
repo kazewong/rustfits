@@ -50,10 +50,12 @@ impl Header {
         }
     }
 
-    pub fn list_keywords(&self) {
+    pub fn list_keywords(&self) -> Vec<(String, String)> {
+        let mut keywords = Vec::new();
         for (key, value) in &self.keywords {
-            println!("{}: {}", key, value[0]);
+            keywords.push((key.to_string(), value[0].to_string()));
         }
+        keywords
     }
 
     pub fn get_keyword(&self, keyword: &str) -> Option<String> {
