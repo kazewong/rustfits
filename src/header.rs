@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::str;
+use std::fmt;
 
 #[derive(Debug)]
 pub struct Header {
@@ -112,4 +113,16 @@ pub enum HeaderType {
     Image,
     ASCIITable,
     BinaryTable,
+}
+
+impl fmt::Display for HeaderType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Use `self.number` to refer to each positional data point.
+        write!(f, "{}", match self {
+            HeaderType::Primary => "Primary",
+            HeaderType::Image => "Image",
+            HeaderType::ASCIITable => "ASCII Table",
+            HeaderType::BinaryTable => "Binary Table",
+        })
+    }
 }

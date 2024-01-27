@@ -322,13 +322,13 @@ impl Data {
         }
     }
 
-    pub fn convert_fitsblocks(&self) -> Vec<[i16; 1440]>{
-        match self {
-            Data::Primary(_) => Vec::new(),
-            Data::Image(image) => image.convert_fitsblocks(),
-            Data::ASCIITable(_) => Vec::new(),
-            Data::BinaryTable(_) => Vec::new(),
-        }
-    }
+    // pub fn convert_fitsblocks(&self) -> Vec<[i16; 1440]>{
+    //     match self {
+    //         Data::Primary(_) => Vec::new(),
+    //         Data::Image(image) => image.convert_fitsblocks(),
+    //         Data::ASCIITable(_) => Vec::new(),
+    //         Data::BinaryTable(_) => Vec::new(),
+    //     }
+    // }
 
 }
