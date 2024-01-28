@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::str;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Header {
     fitsblocks: Vec<[u8; 2880]>,
     header_type: HeaderType,
@@ -109,7 +109,7 @@ impl Header {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum HeaderType {
     Primary,
     Image,

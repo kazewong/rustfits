@@ -86,7 +86,7 @@ impl Precision {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Primary {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: i8,
@@ -124,7 +124,7 @@ impl Primary {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Image {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: i8,
@@ -164,7 +164,7 @@ impl Image {
     // pub fn to_image
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ASCIITable {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: i8,
@@ -227,7 +227,7 @@ impl ASCIITable {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinaryTable {
     fitsblocks: Vec<[u8; 2880]>,
     bitpix: i8,
@@ -279,7 +279,7 @@ impl BinaryTable {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Data {
     Primary(Primary),
     Image(Image),

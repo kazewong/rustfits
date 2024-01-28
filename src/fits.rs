@@ -6,16 +6,22 @@ use header::Header;
 use data::Data;
 use std::convert::TryInto;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct HDU {
     pub header: Header,
     pub data: Data,
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct FITS {
     pub hdus: Vec<HDU>,
 }
 
 impl FITS{
+
+    pub fn new() -> FITS {
+        FITS { hdus: Vec::new() }
+    }
 
     pub fn new_from_buffer(buffer: &Vec<u8>) -> FITS {
         let mut hdus = FITS::bytes_to_hdu(&buffer);
