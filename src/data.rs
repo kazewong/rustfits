@@ -149,9 +149,9 @@ impl Image {
         }
         Image {
             fitsblocks: fitsblocks.to_vec(),
-            bitpix: bitpix,
-            naxis: naxis,
-            naxisn: naxisn,
+            bitpix,
+            naxis,
+            naxisn,
             pcount: 0,
             gcount: 1,
         }
