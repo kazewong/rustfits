@@ -87,6 +87,14 @@ impl FITS{
         }
         hdus
     }
+
+    pub fn list_headers(&self) -> Vec<String> {
+        let mut result: Vec<String> = Vec::new();
+        for hdu in &self.hdus {
+            result.push(hdu.header.get_header_type().to_string());
+        }
+        result
+    }
     
 }
 
