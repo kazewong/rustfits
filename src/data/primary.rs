@@ -23,7 +23,7 @@ impl Primary {
     }
 
     pub fn convert_fitsblocks(&self) -> Precision {
-        let mut fitsblocks: Vec<[u8; 2880]> = self.fitsblocks.to_vec();
+        let fitsblocks: Vec<[u8; 2880]> = self.fitsblocks.to_vec();
         let mut precision: Precision = match self.bitpix {
             8 => Precision::U8(Vec::new()),
             16 => Precision::I16(Vec::new()),

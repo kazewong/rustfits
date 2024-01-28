@@ -2,6 +2,8 @@ use crate::header;
 
 use header::Header;
 
+
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct ASCIITable {
     pub fitsblocks: Vec<[u8; 2880]>,
@@ -49,19 +51,23 @@ impl ASCIITable {
         }
         ASCIITable {
             fitsblocks: fitsblocks.to_vec(),
-            bitpix: bitpix,
-            naxis: naxis,
-            naxisn: naxisn,
+            bitpix,
+            naxis,
+            naxisn,
             pcount: 0,
             gcount: 1,
-            tfields: tfields,
-            tformn: tformn,
-            tbcoln: tbcoln,
+            tfields,
+            tformn,
+            tbcoln,
         }
     }
 
     pub fn n_bits(&self) -> u32 {
         (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
+    }
+
+    pub fn format_data(&self) {
+
     }
 }
 
@@ -102,13 +108,13 @@ impl BinaryTable {
         }
         BinaryTable {
             fitsblocks: fitsblocks.to_vec(),
-            bitpix: bitpix,
-            naxis: naxis,
-            naxisn: naxisn,
+            bitpix,
+            naxis,
+            naxisn,
             pcount: 0,
             gcount: 1,
-            tfields: tfields,
-            tformn: tformn,
+            tfields,
+            tformn,
         }
     }
 
