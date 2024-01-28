@@ -1,10 +1,10 @@
 use std::u8;
 
-use crate::data::tables;
+use crate::data::{primary, image, tables};
 use crate::header;
 use byteorder::{BigEndian, ByteOrder};
 
-enum Precision{
+pub enum Precision{
     U8(Vec<[u8; 2880]>),
     I16(Vec<[i16; 1440]>),
     I32(Vec<[i32; 720]>),
@@ -14,7 +14,7 @@ enum Precision{
 }
 impl Precision {
 
-    fn convert_fitsblocks(fitsblocks: Vec<[u8; 2880]>, precision: Precision) -> Precision {
+    pub fn convert_fitsblocks(fitsblocks: Vec<[u8; 2880]>, precision: Precision) -> Precision {
         match precision {
             Precision::U8(_) => Precision::U8(fitsblocks),
             Precision::I16(_) => Precision::I16(Precision::convert_fitsblocks_to_i16(fitsblocks)),
@@ -86,95 +86,19 @@ impl Precision {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Primary {
-    fitsblocks: Vec<[u8; 2880]>,
-    bitpix: i8,
-    naxis: u8,
-    naxisn: Vec<u32>,
-}
 
-impl Primary {
-    pub fn new() -> Primary {
-        Primary {
-            fitsblocks: Vec::new(),
-            bitpix: 0,
-            naxis: 0,
-            naxisn: Vec::new(),
-        }
-    }
-
-    pub fn n_bits(&self) -> u32 {
-        (self.bitpix.abs() as u32)*(self.naxisn.iter().product::<u32>())
-    }
-
-    pub fn convert_fitsblocks(&self) -> Precision {
-        let mut fitsblocks: Vec<[u8; 2880]> = self.fitsblocks.to_vec();
-        let mut precision: Precision = match self.bitpix {
-            8 => Precision::U8(Vec::new()),
-            16 => Precision::I16(Vec::new()),
-            32 => Precision::I32(Vec::new()),
-            64 => Precision::I64(Vec::new()),
-            -32 => Precision::F32(Vec::new()),
-            -64 => Precision::F64(Vec::new()),
-            _ => Precision::U8(Vec::new()),
-        };
-        precision = Precision::convert_fitsblocks(fitsblocks, precision);
-        precision
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Image {
-    fitsblocks: Vec<[u8; 2880]>,
-    bitpix: i8,
-    naxis: u8,
-    naxisn: Vec<u32>,
-    pcount: u32,
-    gcount: u32,
-}
-
-impl Image {
-    pub fn new(fitsblocks: &Vec<[u8; 2880]>, header: &header::Header) -> Image {
-        let bitpix = header.get_keyword("BITPIX").unwrap().parse::<i8>().unwrap();
-        let naxis = header.get_keyword("NAXIS").unwrap().parse::<u8>().unwrap();
-        let mut naxisn: Vec<u32> = Vec::new();
-        for i in 1..=naxis {
-            let naxisn_i = header
-                .get_keyword(&format!("NAXIS{}", i))
-                .unwrap()
-                .parse::<u32>()
-                .unwrap();
-            naxisn.push(naxisn_i);
-        }
-        Image {
-            fitsblocks: fitsblocks.to_vec(),
-            bitpix,
-            naxis,
-            naxisn,
-            pcount: 0,
-            gcount: 1,
-        }
-    }
-
-    pub fn n_bits(&self) -> u32 {
-        (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
-    }
-
-    // pub fn to_image
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Data {
-    Primary(Primary),
-    Image(Image),
+    Primary(primary::Primary),
+    Image(image::Image),
     ASCIITable(tables::ASCIITable),
     BinaryTable(tables::BinaryTable),
 }
 
 impl Data {
     pub fn new() -> Data {
-        Data::Primary(Primary::new())
+        Data::Primary(primary::Primary::new())
     }
 
     pub fn append(&mut self, chunk: [u8; 2880]) {
@@ -189,8 +113,8 @@ impl Data {
     pub fn from_header(fitsblocks: &Vec<[u8; 2880]>, header: &header::Header) -> Data {
         let header_type = header.get_header_type();
         match header_type {
-            header::HeaderType::Primary => Data::Primary(Primary::new()),
-            header::HeaderType::Image => Data::Image(Image::new(fitsblocks, header)),
+            header::HeaderType::Primary => Data::Primary(primary::Primary::new()),
+            header::HeaderType::Image => Data::Image(image::Image::new(fitsblocks, header)),
             header::HeaderType::ASCIITable => Data::ASCIITable(tables::ASCIITable::new(fitsblocks, header)),
             header::HeaderType::BinaryTable => {
                 Data::BinaryTable(tables::BinaryTable::new(fitsblocks, header))
