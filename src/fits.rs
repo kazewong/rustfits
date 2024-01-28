@@ -3,13 +3,12 @@ use crate::header;
 use crate::data;
 
 use header::Header;
-use data::Data;
 use std::convert::TryInto;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct HDU {
     pub header: Header,
-    pub data: Data,
+    pub data: data::data::Data,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -27,7 +26,7 @@ impl FITS{
         let mut hdus = FITS::bytes_to_hdu(&buffer);
         for i in 0..hdus.len() {
             hdus[i].header.initialize_header();
-            hdus[i].data = Data::from_header(hdus[i].data.get_fitsblocks(), &hdus[i].header)
+            hdus[i].data = data::data::Data::from_header(hdus[i].data.get_fitsblocks(), &hdus[i].header)
         }
         FITS { hdus: hdus }
     }
@@ -60,7 +59,7 @@ impl FITS{
         let mut hdus: Vec<HDU> = Vec::new();
         let mut current_hdu: HDU = HDU {
             header: Header::new(),
-            data: Data::new(),
+            data: data::data::Data::new(),
         };
         for i in 0..n_chunks {
             let start = i * 2880;
@@ -74,7 +73,7 @@ impl FITS{
                     hdus.push(current_hdu);
                     current_hdu = HDU {
                         header: Header::new(),
-                        data: Data::new(),
+                        data: data::data::Data::new(),
                     };
                 }
             }
