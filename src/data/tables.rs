@@ -66,8 +66,17 @@ impl ASCIITable {
         (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
     }
 
-    pub fn format_data(&self) {
-
+    pub fn format_data(&self) -> Vec<Vec<u8>>{
+        let fitsblocks_flat: Vec<u8> = self.fitsblocks.iter().flatten().cloned().collect();
+        let mut data: Vec<Vec<u8>> = Vec::new();
+        let row_length: u32 = self.naxisn[0];
+        let n_row: u32 = self.naxisn[1];
+        let n_field: u32 = self.tfields;
+        for i in 0..n_row {
+            let row: Vec<u8> = fitsblocks_flat[i as usize*row_length as usize..(i+1) as usize*row_length as usize].to_vec();
+            data.push(row);
+        }
+        data
     }
 }
 
