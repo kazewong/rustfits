@@ -52,22 +52,15 @@ pub enum ASCIIField {
 }
 
 impl ASCIIField{
-    pub fn new(data: &[u8]) -> ASCIIField {
-        let data_string = String::from_utf8(data.to_vec()).unwrap();
-        let data_string = data_string.trim();
-        if data_string.contains(".") {
-            let data_f32 = data_string.parse::<f32>().unwrap();
-            if data_string.contains("E") {
-                ASCIIField::FloatExponential(data_f32)
-            } else {
-                ASCIIField::FloatDecimal(data_f32)
-            }
-        } else if data_string.contains("E") {
-            let data_f64 = data_string.parse::<f64>().unwrap();
-            ASCIIField::DoubleExponential(data_f64)
-        } else {
-            let data_i32 = data_string.parse::<i32>().unwrap();
-            ASCIIField::Integer(data_i32)
+    pub fn new(data: &[u8], format: String) -> ASCIIField {
+        let ascii: String = String::from_utf8(data.to_vec()).unwrap().trim().to_string();
+        match format {
+            format if format.contains("A") => ASCIIField::Character(ascii),
+            format if format.contains("I") => ASCIIField::Integer(ascii.parse::<i32>().unwrap()),
+            format if format.contains("F") => ASCIIField::FloatDecimal(ascii.parse::<f32>().unwrap()),
+            format if format.contains("E") => ASCIIField::FloatExponential(ascii.parse::<f32>().unwrap()),
+            format if format.contains("D") => ASCIIField::DoubleExponential(ascii.parse::<f64>().unwrap()),
+            _ => ASCIIField::Character(ascii),
         }
     }
 }
@@ -145,6 +138,7 @@ impl ASCIITable {
                     [self.tbcoln[i as usize] as usize - 1..self.tbcoln[i as usize] as usize
                         + self.tformn[i as usize].parse::<u32>().unwrap() as usize
                         - 1],
+                self.tformn[i as usize].clone(),
             ));
         }
         result

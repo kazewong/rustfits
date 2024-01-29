@@ -1,4 +1,5 @@
 use rustfits::fits::{HDU, FITS};
+use rustfits::data::data::Data::ASCIITable;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
@@ -16,7 +17,14 @@ fn test_wfpc2() -> io::Result<()> {
             fits.hdus[i].header.get_keyword("NAXIS").unwrap()
         );
         println!("Data: {:?}\n",fits.hdus[i].data);
-        fits.hdus[i].data.convert_fitsblocks();
+    }
+    match fits.hdus[1].data{
+        ASCIITable() => {
+            println!("ASCIITable");
+        },
+        _ => {
+            println!("Not an image");
+        }
     }
     Ok(())
 }
