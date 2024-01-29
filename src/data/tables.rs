@@ -164,7 +164,7 @@ impl ASCIITable {
     }
 }
 
-enum BinaryField {
+pub enum BinaryField {
     Logical(bool),
     Bit(u8),
     Byte(u8),
