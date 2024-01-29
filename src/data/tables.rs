@@ -38,7 +38,6 @@ impl<T: std::clone::Clone> Matrix2D<T> {
 
     pub fn append_row(&mut self, row: Vec<T>) {
         self.data.extend(row);
-        self.n_row += 1;
     }
 }
 
@@ -56,10 +55,10 @@ impl ASCIIField{
         let ascii: String = String::from_utf8(data.to_vec()).unwrap().trim().to_string();
         match format {
             format if format.contains("A") => ASCIIField::Character(ascii),
-            format if format.contains("I") => ASCIIField::Integer(ascii.parse::<i32>().unwrap()),
-            format if format.contains("F") => ASCIIField::FloatDecimal(ascii.parse::<f32>().unwrap()),
-            format if format.contains("E") => ASCIIField::FloatExponential(ascii.parse::<f32>().unwrap()),
-            format if format.contains("D") => ASCIIField::DoubleExponential(ascii.parse::<f64>().unwrap()),
+            format if format.contains("I") => ASCIIField::Integer(ascii.parse::<i32>().unwrap()), // Formatting is not correct yet
+            format if format.contains("F") => ASCIIField::FloatDecimal(ascii.parse::<f32>().unwrap()), // Formatting is not correct yet
+            format if format.contains("E") => ASCIIField::FloatExponential(ascii.parse::<f32>().unwrap()), // Formatting is not correct yet
+            format if format.contains("D") => ASCIIField::DoubleExponential(ascii.parse::<f64>().unwrap()), // Formatting is not correct yet
             _ => ASCIIField::Character(ascii),
         }
     }
@@ -132,15 +131,20 @@ impl ASCIITable {
     fn parse_row(&self, data: &[u8]) -> Vec<ASCIIField> {
         let mut result: Vec<ASCIIField> = Vec::new();
         let local_data = data.to_vec();
-        for i in 0..self.tfields {
+        for i in 0..self.tfields-1 {
             result.push(ASCIIField::new(
                 &local_data
-                    [self.tbcoln[i as usize] as usize - 1..self.tbcoln[i as usize] as usize
-                        + self.tformn[i as usize].parse::<u32>().unwrap() as usize
-                        - 1],
+                [self.tbcoln[i as usize] as usize - 1..self.tbcoln[(i+1) as usize] as usize-1],
                 self.tformn[i as usize].clone(),
             ));
         }
+        result.push(
+            ASCIIField::new(
+                &local_data
+                [self.tbcoln[(self.tfields-1) as usize] as usize - 1..],
+                self.tformn[(self.tfields-1) as usize].clone(),
+            )
+        );
         result
     }
 
