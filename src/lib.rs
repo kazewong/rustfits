@@ -1,3 +1,3 @@
 pub mod fits;
-mod header;
-mod data;
+pub mod header;
+pub mod data;
