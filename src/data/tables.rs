@@ -10,7 +10,11 @@ pub struct Matrix<T> {
 
 impl<T: std::clone::Clone> Matrix<T> {
     pub fn new(data: Vec<T>, n_row: u32, n_column: u32) -> Matrix<T> {
-        Matrix { data, n_row, n_column }
+        Matrix {
+            data,
+            n_row,
+            n_column,
+        }
     }
 
     pub fn get_row(&self, row: u32) -> Vec<T> {
@@ -44,6 +48,27 @@ pub enum ASCIIField {
     FloatDecimal(f32),
     FloatExponential(f32),
     DoubleExponential(f64),
+}
+
+impl ASCIIField{
+    pub fn new(data: &[u8]) -> ASCIIField {
+        let data_string = String::from_utf8(data.to_vec()).unwrap();
+        let data_string = data_string.trim();
+        if data_string.contains(".") {
+            let data_f32 = data_string.parse::<f32>().unwrap();
+            if data_string.contains("E") {
+                ASCIIField::FloatExponential(data_f32)
+            } else {
+                ASCIIField::FloatDecimal(data_f32)
+            }
+        } else if data_string.contains("E") {
+            let data_f64 = data_string.parse::<f64>().unwrap();
+            ASCIIField::DoubleExponential(data_f64)
+        } else {
+            let data_i32 = data_string.parse::<i32>().unwrap();
+            ASCIIField::Integer(data_i32)
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -110,8 +135,17 @@ impl ASCIITable {
             * (self.pcount + self.naxisn.iter().product::<u32>())
     }
 
-    fn parse_row(&self, data: &[u8]) -> Vec<ASCIIField>{
+    fn parse_row(&self, data: &[u8]) -> Vec<ASCIIField> {
         let mut result: Vec<ASCIIField> = Vec::new();
+        let local_data = data.to_vec();
+        for i in 0..self.tfields {
+            result.push(ASCIIField::new(
+                &local_data
+                    [self.tbcoln[i as usize] as usize - 1..self.tbcoln[i as usize] as usize
+                        + self.tformn[i as usize].parse::<u32>().unwrap() as usize
+                        - 1],
+            ));
+        }
         result
     }
 
@@ -122,8 +156,10 @@ impl ASCIITable {
         let n_field: u32 = self.tfields;
         let mut result: Matrix<ASCIIField> = Matrix::new(Vec::new(), n_row, n_field);
         for i in 0..n_row {
-            result.append_row(self.parse_row(&fitsblocks_flat
-                [i as usize * row_length as usize..(i + 1) as usize * row_length as usize]));
+            result.append_row(self.parse_row(
+                &fitsblocks_flat
+                    [i as usize * row_length as usize..(i + 1) as usize * row_length as usize],
+            ));
         }
         result
     }
