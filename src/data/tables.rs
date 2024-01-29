@@ -2,7 +2,43 @@ use crate::header;
 
 use header::Header;
 
-enum ASCIIField{
+pub struct Matrix<T> {
+    data: Vec<T>,
+    n_row: u32,
+    n_column: u32,
+}
+
+impl<T: std::clone::Clone> Matrix<T> {
+    pub fn new(data: Vec<T>, n_row: u32, n_column: u32) -> Matrix<T> {
+        Matrix { data, n_row, n_column }
+    }
+
+    pub fn get_row(&self, row: u32) -> Vec<T> {
+        let row_length = self.data.len() as u32 / self.n_row;
+        let row_start = row * row_length;
+        let row_end = (row + 1) * row_length;
+        self.data[row_start as usize..row_end as usize].to_vec()
+    }
+
+    pub fn get_column(&self, column: u32) -> Vec<T> {
+        let row_length = self.data.len() as u32 / self.n_row;
+        let mut column_data: Vec<T> = Vec::new();
+        for i in 0..self.n_row {
+            let row_start = i * row_length;
+            let row_end = (i + 1) * row_length;
+            column_data.push(self.data[row_start as usize + column as usize].clone());
+        }
+        column_data
+    }
+
+    pub fn append_row(&mut self, row: Vec<T>) {
+        self.data.extend(row);
+        self.n_row += 1;
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ASCIIField {
     Character(String),
     Integer(i32),
     FloatDecimal(f32),
@@ -69,24 +105,31 @@ impl ASCIITable {
     }
 
     pub fn n_bits(&self) -> u32 {
-        (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
+        (self.bitpix.abs() as u32)
+            * self.gcount
+            * (self.pcount + self.naxisn.iter().product::<u32>())
     }
 
-    pub fn format_data(&self) -> Vec<Vec<u8>>{
+    fn parse_row(&self, data: &[u8]) -> Vec<ASCIIField>{
+        let mut result: Vec<ASCIIField> = Vec::new();
+        result
+    }
+
+    pub fn format_data(&self) -> Matrix<ASCIIField> {
         let fitsblocks_flat: Vec<u8> = self.fitsblocks.iter().flatten().cloned().collect();
-        let mut data: Vec<Vec<u8>> = Vec::new();
         let row_length: u32 = self.naxisn[0];
         let n_row: u32 = self.naxisn[1];
         let n_field: u32 = self.tfields;
+        let mut result: Matrix<ASCIIField> = Matrix::new(Vec::new(), n_row, n_field);
         for i in 0..n_row {
-            let row: Vec<u8> = fitsblocks_flat[i as usize*row_length as usize..(i+1) as usize*row_length as usize].to_vec();
-            data.push(row);
+            result.append_row(self.parse_row(&fitsblocks_flat
+                [i as usize * row_length as usize..(i + 1) as usize * row_length as usize]));
         }
-        data
+        result
     }
 }
 
-enum BinaryField{
+enum BinaryField {
     Logical(bool),
     Bit(u8),
     Byte(u8),
@@ -99,7 +142,7 @@ enum BinaryField{
     Complex32(f32, f32),
     Complex64(f64, f64),
     Array32(f32, f32),
-    Array64(f64, f64)
+    Array64(f64, f64),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -150,6 +193,8 @@ impl BinaryTable {
     }
 
     pub fn n_bits(&self) -> u32 {
-        (self.bitpix.abs() as u32)*self.gcount*(self.pcount+self.naxisn.iter().product::<u32>())
+        (self.bitpix.abs() as u32)
+            * self.gcount
+            * (self.pcount + self.naxisn.iter().product::<u32>())
     }
 }
