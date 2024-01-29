@@ -2,15 +2,16 @@ use crate::header;
 
 use header::Header;
 
-pub struct Matrix<T> {
+#[derive(Clone, Debug, PartialEq)]
+pub struct Matrix2D<T> {
     data: Vec<T>,
     n_row: u32,
     n_column: u32,
 }
 
-impl<T: std::clone::Clone> Matrix<T> {
-    pub fn new(data: Vec<T>, n_row: u32, n_column: u32) -> Matrix<T> {
-        Matrix {
+impl<T: std::clone::Clone> Matrix2D<T> {
+    pub fn new(data: Vec<T>, n_row: u32, n_column: u32) -> Matrix2D<T> {
+        Matrix2D {
             data,
             n_row,
             n_column,
@@ -149,12 +150,12 @@ impl ASCIITable {
         result
     }
 
-    pub fn format_data(&self) -> Matrix<ASCIIField> {
+    pub fn format_data(&self) -> Matrix2D<ASCIIField> {
         let fitsblocks_flat: Vec<u8> = self.fitsblocks.iter().flatten().cloned().collect();
         let row_length: u32 = self.naxisn[0];
         let n_row: u32 = self.naxisn[1];
         let n_field: u32 = self.tfields;
-        let mut result: Matrix<ASCIIField> = Matrix::new(Vec::new(), n_row, n_field);
+        let mut result: Matrix2D<ASCIIField> = Matrix2D::new(Vec::new(), n_row, n_field);
         for i in 0..n_row {
             result.append_row(self.parse_row(
                 &fitsblocks_flat
