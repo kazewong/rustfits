@@ -5,7 +5,9 @@ use header::Header;
 enum ASCIIField{
     Character(String),
     Integer(i32),
-
+    FloatDecimal(f32),
+    FloatExponential(f32),
+    DoubleExponential(f64),
 }
 
 #[derive(Debug, Clone, PartialEq)]
