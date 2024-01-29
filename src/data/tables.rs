@@ -1,6 +1,7 @@
 use crate::header;
 
 use header::Header;
+use std::fmt;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Matrix2D<T> {
@@ -41,6 +42,20 @@ impl<T: std::clone::Clone> Matrix2D<T> {
     }
 }
 
+impl Iterator for Matrix2D<ASCIIField> {
+    type Item = Vec<ASCIIField>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.data.len() == 0 {
+            None
+        } else {
+            let row = self.get_row(0);
+            self.data = self.data[row.len() as usize..].to_vec();
+            Some(row)
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum ASCIIField {
     Character(String),
@@ -50,16 +65,34 @@ pub enum ASCIIField {
     DoubleExponential(f64),
 }
 
-impl ASCIIField{
+impl ASCIIField {
     pub fn new(data: &[u8], format: String) -> ASCIIField {
         let ascii: String = String::from_utf8(data.to_vec()).unwrap().trim().to_string();
         match format {
             format if format.contains("A") => ASCIIField::Character(ascii),
             format if format.contains("I") => ASCIIField::Integer(ascii.parse::<i32>().unwrap()), // Formatting is not correct yet
-            format if format.contains("F") => ASCIIField::FloatDecimal(ascii.parse::<f32>().unwrap()), // Formatting is not correct yet
-            format if format.contains("E") => ASCIIField::FloatExponential(ascii.parse::<f32>().unwrap()), // Formatting is not correct yet
-            format if format.contains("D") => ASCIIField::DoubleExponential(ascii.parse::<f64>().unwrap()), // Formatting is not correct yet
+            format if format.contains("F") => {
+                ASCIIField::FloatDecimal(ascii.parse::<f32>().unwrap())
+            } // Formatting is not correct yet
+            format if format.contains("E") => {
+                ASCIIField::FloatExponential(ascii.parse::<f32>().unwrap())
+            } // Formatting is not correct yet
+            format if format.contains("D") => {
+                ASCIIField::DoubleExponential(ascii.parse::<f64>().unwrap())
+            } // Formatting is not correct yet
             _ => ASCIIField::Character(ascii),
+        }
+    }
+}
+
+impl fmt::Display for ASCIIField {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ASCIIField::Character(value) => write!(f, "{}", value),
+            ASCIIField::Integer(value) => write!(f, "{}", value),
+            ASCIIField::FloatDecimal(value) => write!(f, "{}", value),
+            ASCIIField::FloatExponential(value) => write!(f, "{}", value),
+            ASCIIField::DoubleExponential(value) => write!(f, "{}", value),
         }
     }
 }
@@ -131,20 +164,17 @@ impl ASCIITable {
     fn parse_row(&self, data: &[u8]) -> Vec<ASCIIField> {
         let mut result: Vec<ASCIIField> = Vec::new();
         let local_data = data.to_vec();
-        for i in 0..self.tfields-1 {
+        for i in 0..self.tfields - 1 {
             result.push(ASCIIField::new(
-                &local_data
-                [self.tbcoln[i as usize] as usize - 1..self.tbcoln[(i+1) as usize] as usize-1],
+                &local_data[self.tbcoln[i as usize] as usize - 1
+                    ..self.tbcoln[(i + 1) as usize] as usize - 1],
                 self.tformn[i as usize].clone(),
             ));
         }
-        result.push(
-            ASCIIField::new(
-                &local_data
-                [self.tbcoln[(self.tfields-1) as usize] as usize - 1..],
-                self.tformn[(self.tfields-1) as usize].clone(),
-            )
-        );
+        result.push(ASCIIField::new(
+            &local_data[self.tbcoln[(self.tfields - 1) as usize] as usize - 1..],
+            self.tformn[(self.tfields - 1) as usize].clone(),
+        ));
         result
     }
 
