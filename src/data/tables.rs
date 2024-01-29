@@ -2,7 +2,11 @@ use crate::header;
 
 use header::Header;
 
+enum ASCIIField{
+    Character(String),
+    Integer(i32),
 
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ASCIITable {
@@ -78,6 +82,22 @@ impl ASCIITable {
         }
         data
     }
+}
+
+enum BinaryField{
+    Logical(bool),
+    Bit(u8),
+    Byte(u8),
+    I16(i16),
+    I32(i32),
+    I64(i64),
+    Character(u8),
+    F32(f32),
+    F64(f64),
+    Complex32(f32, f32),
+    Complex64(f64, f64),
+    Array32(f32, f32),
+    Array64(f64, f64)
 }
 
 #[derive(Debug, Clone, PartialEq)]
