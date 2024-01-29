@@ -18,12 +18,12 @@ fn test_wfpc2() -> io::Result<()> {
         );
         println!("Data: {:?}\n",fits.hdus[i].data);
     }
-    match fits.hdus[1].data{
-        ASCIITable() => {
-            println!("ASCIITable");
+    match &fits.hdus[1].data {
+        ASCIITable(table) => {
+            table.format_data();
         },
         _ => {
-            println!("Not an image");
+            println!("Not an ASCIITable");
         }
     }
     Ok(())

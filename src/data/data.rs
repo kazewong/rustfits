@@ -86,7 +86,11 @@ impl Precision {
     }
 }
 
-
+// pub trait Data{
+//     fn get_fitsblocks(&self) -> &Vec<[u8; 2880]>;
+//     fn append_fitsblock(&mut self, fitsblock: [u8; 2880]);
+//     fn from_header(fitsblocks: &Vec<[u8; 2880]>, header: &header::Header) -> Self;
+// }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Data {
