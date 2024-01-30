@@ -1,4 +1,5 @@
 
+
 use crate::header;
 use crate::data;
 
@@ -13,6 +14,7 @@ pub struct HDU {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FITS {
+    /// FITS file contains a vector of HDUs
     pub hdus: Vec<HDU>,
 }
 
@@ -23,6 +25,13 @@ impl FITS{
     }
 
     pub fn new_from_buffer(buffer: &Vec<u8>) -> FITS {
+        /// Create a FITS file from a buffer of bytes
+        /// 
+        /// # Arguments
+        /// 
+        /// * `buffer` - A vector of bytes
+        /// 
+        /// # Example
         let mut hdus = FITS::bytes_to_hdu(&buffer);
         for i in 0..hdus.len() {
             hdus[i].header.initialize_header();
