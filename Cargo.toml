@@ -3,6 +3,9 @@ name = "rustfits"
 version = "0.1.0"
 authors = ["Kaze Wong <kazewong.physics@gmail.com>"]
 edition = "2018"
+description = "A light-weight FITS file reader in Rust"
+license = "MIT"
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
