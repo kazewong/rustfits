@@ -215,6 +215,24 @@ impl BinaryField{
     pub fn new(data: &[u8], format: String) -> BinaryField{
         todo!()
     }
+
+    pub fn n_bits(input: BinaryField) -> u8{
+        match input{
+            BinaryField::Logical(_) => 1,
+            BinaryField::Bit(_) => 1,
+            BinaryField::Byte(_) => 1,
+            BinaryField::I16(_) => 2,
+            BinaryField::I32(_) => 4,
+            BinaryField::I64(_) => 8,
+            BinaryField::Character(_) => 1,
+            BinaryField::F32(_) => 4,
+            BinaryField::F64(_) => 8,
+            BinaryField::Complex32(_, _) => 8,
+            BinaryField::Complex64(_, _) => 16,
+            BinaryField::Array32(_, _) => 8,
+            BinaryField::Array64(_, _) => 16,
+        }
+    }
 }
 
 impl fmt::Display for BinaryField{
@@ -281,6 +299,7 @@ impl BinaryTable {
     }
 
     pub fn format_data(&self) -> Matrix2D<BinaryField> {
+        let fitsblocks_flat: Vec<u8> = self.fitsblocks.iter().flatten().cloned().collect();
         todo!()
     }
 }
