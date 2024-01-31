@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::str;
 use std::fmt;
+use std::str;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Header {
@@ -52,12 +52,19 @@ impl Header {
         }
     }
 
-    pub fn list_keywords(&self) -> Vec<(String, String)> {
-        let mut keywords = Vec::new();
-        for (key, value) in &self.keywords {
-            keywords.push((key.to_string(), value.1[0].to_string()));
+    pub fn list_keywords(&self, sorted: bool) -> Vec<(String, String)> {
+        let input = self
+            .keywords
+            .iter()
+            .map(|(key, value)| (key, value))
+            .collect::<Vec<(&String, &(u16, [String; 2]))>>();
+        if sorted{
+            let mut input = input;
+            input.sort_by(|a, b| a.1.0.cmp(&b.1.0));
+            input.iter().map(|(key, value)| (key.to_string(), value.1[0].to_string())).collect::<Vec<(String, String)>>()
+        }else{
+            input.iter().map(|(key, value)| (key.to_string(), value.1[0].to_string())).collect::<Vec<(String, String)>>()
         }
-        keywords
     }
 
     pub fn get_keyword(&self, keyword: &str) -> Option<String> {
@@ -122,11 +129,15 @@ pub enum HeaderType {
 impl fmt::Display for HeaderType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Use `self.number` to refer to each positional data point.
-        write!(f, "{}", match self {
-            HeaderType::Primary => "Primary",
-            HeaderType::Image => "Image",
-            HeaderType::ASCIITable => "ASCII Table",
-            HeaderType::BinaryTable => "Binary Table",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                HeaderType::Primary => "Primary",
+                HeaderType::Image => "Image",
+                HeaderType::ASCIITable => "ASCII Table",
+                HeaderType::BinaryTable => "Binary Table",
+            }
+        )
     }
 }
