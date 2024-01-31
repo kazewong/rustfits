@@ -255,7 +255,21 @@ impl BinaryField{
 
 impl fmt::Display for BinaryField{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        match self {
+            BinaryField::Logical(value) => write!(f, "{}", value),
+            BinaryField::Bit(value) => write!(f, "{}", value),
+            BinaryField::Byte(value) => write!(f, "{}", value),
+            BinaryField::I16(value) => write!(f, "{}", value),
+            BinaryField::I32(value) => write!(f, "{}", value),
+            BinaryField::I64(value) => write!(f, "{}", value),
+            BinaryField::Character(value) => write!(f, "{}", value),
+            BinaryField::F32(value) => write!(f, "{}", value),
+            BinaryField::F64(value) => write!(f, "{}", value),
+            BinaryField::Complex32(value1, value2) => write!(f, "{} {}", value1, value2),
+            BinaryField::Complex64(value1, value2) => write!(f, "{} {}", value1, value2),
+            BinaryField::Array32(value1, value2) => write!(f, "{} {}", value1, value2),
+            BinaryField::Array64(value1, value2) => write!(f, "{} {}", value1, value2),
+        }
     }
 }
 
