@@ -1,5 +1,5 @@
-use rustfits::fits::{HDU, FITS};
-use rustfits::data::data::Data::ASCIITable;
+use rustfits::data::data::Data::{ASCIITable, BinaryTable};
+use rustfits::fits::{FITS, HDU};
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
@@ -16,12 +16,12 @@ fn test_wfpc2() -> io::Result<()> {
             "Keyword: NAXIS Value: {}",
             fits.hdus[i].header.get_keyword("NAXIS").unwrap()
         );
-        println!("Data: {:?}\n",fits.hdus[i].data);
+        println!("Data: {:?}\n", fits.hdus[i].data);
     }
     match &fits.hdus[1].data {
         ASCIITable(table) => {
             table.format_data();
-        },
+        }
         _ => {
             println!("Not an ASCIITable");
         }
@@ -42,7 +42,15 @@ fn test_euv() -> io::Result<()> {
             "Keyword: NAXIS Value: {}",
             fits.hdus[i].header.get_keyword("NAXIS").unwrap()
         );
-        println!("Data: {:?}\n",fits.hdus[i].data);
+        // println!("Data: {:?}\n", fits.hdus[i].data);
+    }
+    match &fits.hdus[5].data {
+        BinaryTable(table) => {
+            table.format_data();
+        }
+        _ => {
+            println!("Not an BinaryTable");
+        }
     }
     Ok(())
 }

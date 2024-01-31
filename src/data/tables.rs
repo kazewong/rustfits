@@ -3,6 +3,8 @@ use crate::header;
 use header::Header;
 use std::fmt;
 
+use byteorder::{BigEndian, ByteOrder};
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Matrix2D<T> {
     data: Vec<T>,
@@ -213,24 +215,40 @@ pub enum BinaryField {
 
 impl BinaryField{
     pub fn new(data: &[u8], format: String) -> BinaryField{
-        todo!()
+        match format.as_str(){
+            "L" => BinaryField::Logical(data[0] != 0),
+            "X" => BinaryField::Bit(data[0]),
+            "B" => BinaryField::Byte(data[0]),
+            "I" => BinaryField::I16(BigEndian::read_i16(data)),
+            "J" => BinaryField::I32(BigEndian::read_i32(data)),
+            "K" => BinaryField::I64(BigEndian::read_i64(data)),
+            "A" => BinaryField::Character(data[0]),
+            "E" => BinaryField::F32(BigEndian::read_f32(data)),
+            "D" => BinaryField::F64(BigEndian::read_f64(data)),
+            "C" => BinaryField::Complex32(BigEndian::read_f32(&data[..4]), BigEndian::read_f32(&data[4..])),
+            "M" => BinaryField::Complex64(BigEndian::read_f64(&data[..8]), BigEndian::read_f64(&data[8..])),
+            "P" => BinaryField::Array32(BigEndian::read_f32(&data[..4]), BigEndian::read_f32(&data[4..])),
+            "Q" => BinaryField::Array64(BigEndian::read_f64(&data[..8]), BigEndian::read_f64(&data[8..])),
+            _ => BinaryField::Logical(data[0] != 0),
+        }
     }
 
-    pub fn n_bits(input: BinaryField) -> u8{
-        match input{
-            BinaryField::Logical(_) => 1,
-            BinaryField::Bit(_) => 1,
-            BinaryField::Byte(_) => 1,
-            BinaryField::I16(_) => 2,
-            BinaryField::I32(_) => 4,
-            BinaryField::I64(_) => 8,
-            BinaryField::Character(_) => 1,
-            BinaryField::F32(_) => 4,
-            BinaryField::F64(_) => 8,
-            BinaryField::Complex32(_, _) => 8,
-            BinaryField::Complex64(_, _) => 16,
-            BinaryField::Array32(_, _) => 8,
-            BinaryField::Array64(_, _) => 16,
+    pub fn n_bits(format: char) -> usize{
+        match format {
+            'L' => 1,
+            'X' => 1,
+            'B' => 1,
+            'I' => 2,
+            'J' => 4,
+            'K' => 8,
+            'A' => 1,
+            'E' => 4,
+            'D' => 8,
+            'C' => 8,
+            'M' => 16,
+            'P' => 8,
+            'Q' => 16,
+            _ => 1,
         }
     }
 }
@@ -295,11 +313,33 @@ impl BinaryTable {
     }
 
     fn parse_row(&self, data: &[u8]) -> Vec<BinaryField>{
-        todo!()
+        let mut result: Vec<BinaryField> = Vec::new();
+        let local_data = data.to_vec();
+        let mut cursor: usize = 0;
+        for i in 0..self.tfields - 1 {
+            let length = self.tformn[i as usize].chars().nth(0).unwrap().to_digit(10).unwrap() as usize;
+            let format = self.tformn[i as usize].chars().nth(1).unwrap();
+            result.push(BinaryField::new(
+                &local_data[cursor..cursor + length*BinaryField::n_bits(format)],
+                format.to_string(),
+            ));
+            cursor += length;
+        }
+        result
     }
 
     pub fn format_data(&self) -> Matrix2D<BinaryField> {
         let fitsblocks_flat: Vec<u8> = self.fitsblocks.iter().flatten().cloned().collect();
-        todo!()
+        let row_length: u32 = self.naxisn[0];
+        let n_row: u32 = self.naxisn[1];
+        let n_field: u32 = self.tfields;
+        let mut result: Matrix2D<BinaryField> = Matrix2D::new(Vec::new(), n_row, n_field);
+        for i in 0..n_row {
+            result.append_row(self.parse_row(
+                &fitsblocks_flat
+                    [i as usize * row_length as usize..(i + 1) as usize * row_length as usize],
+            ));
+        }
+        result
     }
 }
