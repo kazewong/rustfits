@@ -7,7 +7,7 @@ pub struct Header {
     fitsblocks: Vec<[u8; 2880]>,
     header_type: HeaderType,
     initiailzed: bool,
-    keywords: HashMap<String, [String; 2]>,
+    keywords: HashMap<String, (u16, [String; 2])>,
 }
 
 impl Header {
@@ -22,11 +22,13 @@ impl Header {
 
     pub fn initialize_header(&mut self) {
         self.initiailzed = true;
+        let mut counter = 0;
         for i in 0..self.fitsblocks.len() {
             let chunk = &self.fitsblocks[i];
             for j in 0..36 {
                 let (keyword, value) = Header::parse_line(&chunk[j * 80..(j + 1) * 80]);
-                self.keywords.insert(keyword, value);
+                self.keywords.insert(keyword, (counter, value));
+                counter += 1;
             }
         }
         self.header_type = self.check_type();
@@ -53,14 +55,14 @@ impl Header {
     pub fn list_keywords(&self) -> Vec<(String, String)> {
         let mut keywords = Vec::new();
         for (key, value) in &self.keywords {
-            keywords.push((key.to_string(), value[0].to_string()));
+            keywords.push((key.to_string(), value.1[0].to_string()));
         }
         keywords
     }
 
     pub fn get_keyword(&self, keyword: &str) -> Option<String> {
         match self.keywords.get(keyword) {
-            Some(value) => Some(value[0].to_string()),
+            Some(value) => Some(value.1[0].to_string()),
             None => Some("Field not found".to_string()),
         }
     }
@@ -94,13 +96,13 @@ impl Header {
         if self.keywords.contains_key("SIMPLE") {
             return HeaderType::Primary;
         } else if self.keywords.contains_key("XTENSION") {
-            match self.keywords.get("XTENSION").unwrap()[0].as_str() {
+            match self.keywords.get("XTENSION").unwrap().1[0].as_str() {
                 "IMAGE" => return HeaderType::Image,
                 "BINTABLE" => return HeaderType::BinaryTable,
                 "TABLE" => return HeaderType::ASCIITable,
                 _ => panic!(
                     "Invalid XTENSION value {:?}. Only standard extension is supported for now",
-                    self.keywords.get("XTENSION").unwrap()[0]
+                    self.keywords.get("XTENSION").unwrap().1[0]
                 ),
             }
         } else {
