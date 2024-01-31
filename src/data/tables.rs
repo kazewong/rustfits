@@ -194,6 +194,7 @@ impl ASCIITable {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryField {
     Logical(bool),
     Bit(u8),
@@ -208,6 +209,18 @@ pub enum BinaryField {
     Complex64(f64, f64),
     Array32(f32, f32),
     Array64(f64, f64),
+}
+
+impl BinaryField{
+    pub fn new(data: &[u8], format: String) -> BinaryField{
+        todo!()
+    }
+}
+
+impl fmt::Display for BinaryField{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -261,5 +274,13 @@ impl BinaryTable {
         (self.bitpix.abs() as u32)
             * self.gcount
             * (self.pcount + self.naxisn.iter().product::<u32>())
+    }
+
+    fn parse_row(&self, data: &[u8]) -> Vec<BinaryField>{
+        todo!()
+    }
+
+    pub fn format_data(&self) -> Matrix2D<BinaryField> {
+        todo!()
     }
 }
