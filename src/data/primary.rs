@@ -1,11 +1,13 @@
 use crate::data::data::Precision;
+use byteorder::{BigEndian, ByteOrder};
+use ndarray::Array;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Primary {
     pub fitsblocks: Vec<[u8; 2880]>,
     bitpix: i8,
     naxis: u8,
-    naxisn: Vec<u32>,
+    naxisn: Vec<usize>,
 }
 
 impl Primary {
@@ -18,22 +20,58 @@ impl Primary {
         }
     }
 
-    pub fn n_bits(&self) -> u32 {
-        (self.bitpix.abs() as u32)*(self.naxisn.iter().product::<u32>())
+    pub fn n_bits(&self) -> usize {
+        (self.bitpix.abs() as usize) * (self.naxisn.iter().product::<usize>())
     }
 
-    pub fn convert_fitsblocks(&self) -> Precision {
-        let fitsblocks: Vec<[u8; 2880]> = self.fitsblocks.to_vec();
-        let mut precision: Precision = match self.bitpix {
-            8 => Precision::U8(Vec::new()),
-            16 => Precision::I16(Vec::new()),
-            32 => Precision::I32(Vec::new()),
-            64 => Precision::I64(Vec::new()),
-            -32 => Precision::F32(Vec::new()),
-            -64 => Precision::F64(Vec::new()),
-            _ => Precision::U8(Vec::new()),
-        };
-        precision = Precision::convert_fitsblocks(fitsblocks, precision);
-        precision
+    pub fn format_data(&self) -> Array<Precision, ndarray::IxDyn> {
+        let fitsblocks_flat: Vec<u8> = self.fitsblocks.iter().flatten().cloned().collect();
+        let mut local_vec: Vec<Precision> = Vec::new();
+        match self.bitpix {
+            8 => {
+                for i in 0..fitsblocks_flat.len() {
+                    local_vec.push(Precision::U8(fitsblocks_flat[i]));
+                }
+            }
+            16 => {
+                for i in 0..fitsblocks_flat.len() / 2 {
+                    local_vec.push(Precision::I16(BigEndian::read_i16(
+                        &fitsblocks_flat[i * 2..(i + 1) * 2],
+                    )));
+                }
+            }
+            32 => {
+                for i in 0..fitsblocks_flat.len() / 4 {
+                    local_vec.push(Precision::I32(BigEndian::read_i32(
+                        &fitsblocks_flat[i * 4..(i + 1) * 4],
+                    )));
+                }
+            }
+            64 => {
+                for i in 0..fitsblocks_flat.len() / 8 {
+                    local_vec.push(Precision::I64(BigEndian::read_i64(
+                        &fitsblocks_flat[i * 8..(i + 1) * 8],
+                    )));
+                }
+            }
+            -32 => {
+                for i in 0..fitsblocks_flat.len() / 4 {
+                    local_vec.push(Precision::F32(BigEndian::read_f32(
+                        &fitsblocks_flat[i * 4..(i + 1) * 4],
+                    )));
+                }
+            }
+            -64 => {
+                for i in 0..fitsblocks_flat.len() / 8 {
+                    local_vec.push(Precision::F64(BigEndian::read_f64(
+                        &fitsblocks_flat[i * 8..(i + 1) * 8],
+                    )));
+                }
+            }
+            _ => {
+                panic!("Unsupported bitpix value: {}", self.bitpix);
+            }
+        }
+        Array::from_shape_vec(self.naxisn.clone(), local_vec).unwrap()
     }
 }
