@@ -86,12 +86,6 @@ impl Precision {
     }
 }
 
-// pub trait Data{
-//     fn get_fitsblocks(&self) -> &Vec<[u8; 2880]>;
-//     fn append_fitsblock(&mut self, fitsblock: [u8; 2880]);
-//     fn from_header(fitsblocks: &Vec<[u8; 2880]>, header: &header::Header) -> Self;
-// }
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum Data {
     Primary(primary::Primary),
@@ -134,14 +128,4 @@ impl Data {
             Data::BinaryTable(binary_table) => &binary_table.fitsblocks,
         }
     }
-
-    // pub fn convert_fitsblocks(&self) -> Vec<[i16; 1440]>{
-    //     match self {
-    //         Data::Primary(_) => Vec::new(),
-    //         Data::Image(image) => image.convert_fitsblocks(),
-    //         Data::ASCIITable(_) => Vec::new(),
-    //         Data::BinaryTable(_) => Vec::new(),
-    //     }
-    // }
-
 }

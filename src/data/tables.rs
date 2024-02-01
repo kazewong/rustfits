@@ -44,19 +44,6 @@ impl<T: std::clone::Clone> Matrix2D<T> {
     }
 }
 
-impl Iterator for Matrix2D<ASCIIField> {
-    type Item = Vec<ASCIIField>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.data.len() == 0 {
-            None
-        } else {
-            let row = self.get_row(0);
-            self.data = self.data[row.len() as usize..].to_vec();
-            Some(row)
-        }
-    }
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ASCIIField {
