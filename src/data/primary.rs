@@ -1,5 +1,8 @@
+use crate::header;
 use crate::data::data::Precision;
+
 use byteorder::{BigEndian, ByteOrder};
+use header::Header;
 use ndarray::Array;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -11,17 +14,28 @@ pub struct Primary {
 }
 
 impl Primary {
-    pub fn new() -> Primary {
+    pub fn new(fitsblocks: &Vec<[u8; 2880]>, header: &Header) -> Primary {
+        let bitpix = header.get_keyword("BITPIX").unwrap().parse::<i8>().unwrap();
+        let naxis = header.get_keyword("NAXIS").unwrap().parse::<u8>().unwrap();
+        let mut naxisn: Vec<usize> = Vec::new();
+        for i in 1..=naxis {
+            let naxisn_i = header
+                .get_keyword(&format!("NAXIS{}", i))
+                .unwrap()
+                .parse::<usize>()
+                .unwrap();
+            naxisn.push(naxisn_i);
+        }
         Primary {
-            fitsblocks: Vec::new(),
-            bitpix: 0,
-            naxis: 0,
-            naxisn: Vec::new(),
+            fitsblocks: fitsblocks.to_vec(),
+            bitpix,
+            naxis,
+            naxisn,
         }
     }
 
-    pub fn n_bits(&self) -> usize {
-        (self.bitpix.abs() as usize) * (self.naxisn.iter().product::<usize>())
+    pub fn n_bytes(&self) -> usize {
+        (self.bitpix.abs() as usize) * (self.naxisn.iter().product::<usize>()) / 8 / (self.bitpix.abs() as usize / 8)
     }
 
     pub fn format_data(&self) -> Array<Precision, ndarray::IxDyn> {
@@ -72,6 +86,6 @@ impl Primary {
                 panic!("Unsupported bitpix value: {}", self.bitpix);
             }
         }
-        Array::from_shape_vec(self.naxisn.clone(), local_vec).unwrap()
+        Array::from_shape_vec(self.naxisn.clone(), local_vec[..self.n_bytes()].to_vec()).unwrap()
     }
 }
