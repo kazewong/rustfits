@@ -13,6 +13,74 @@ pub enum Precision {
     F64(f64),
 }
 
+impl Precision {
+    pub fn to_u8(&self) -> u8 {
+        match self {
+            Precision::U8(value) => *value,
+            Precision::I16(value) => *value as u8,
+            Precision::I32(value) => *value as u8,
+            Precision::I64(value) => *value as u8,
+            Precision::F32(value) => *value as u8,
+            Precision::F64(value) => *value as u8,
+        }
+    }
+
+    pub fn to_i16(&self) -> i16 {
+        match self {
+            Precision::U8(value) => *value as i16,
+            Precision::I16(value) => *value,
+            Precision::I32(value) => *value as i16,
+            Precision::I64(value) => *value as i16,
+            Precision::F32(value) => *value as i16,
+            Precision::F64(value) => *value as i16,
+        }
+    }
+
+    pub fn to_i32(&self) -> i32 {
+        match self {
+            Precision::U8(value) => *value as i32,
+            Precision::I16(value) => *value as i32,
+            Precision::I32(value) => *value,
+            Precision::I64(value) => *value as i32,
+            Precision::F32(value) => *value as i32,
+            Precision::F64(value) => *value as i32,
+        }
+    }
+
+    pub fn to_i64(&self) -> i64 {
+        match self {
+            Precision::U8(value) => *value as i64,
+            Precision::I16(value) => *value as i64,
+            Precision::I32(value) => *value as i64,
+            Precision::I64(value) => *value,
+            Precision::F32(value) => *value as i64,
+            Precision::F64(value) => *value as i64,
+        }
+    }
+
+    pub fn to_f32(&self) -> f32 {
+        match self {
+            Precision::U8(value) => *value as f32,
+            Precision::I16(value) => *value as f32,
+            Precision::I32(value) => *value as f32,
+            Precision::I64(value) => *value as f32,
+            Precision::F32(value) => *value,
+            Precision::F64(value) => *value as f32,
+        }
+    }
+
+    pub fn to_f64(&self) -> f64 {
+        match self {
+            Precision::U8(value) => *value as f64,
+            Precision::I16(value) => *value as f64,
+            Precision::I32(value) => *value as f64,
+            Precision::I64(value) => *value as f64,
+            Precision::F32(value) => *value as f64,
+            Precision::F64(value) => *value,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Empty {
     pub fitsblocks: Vec<[u8; 2880]>,
