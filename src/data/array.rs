@@ -1,20 +1,27 @@
-use crate::header;
 use crate::data::data::Precision;
-
+use crate::header;
 use byteorder::{BigEndian, ByteOrder};
-use header::Header;
 use ndarray::Array;
 
+pub enum ArrayType{
+    Primary,
+    Image,
+    Spectrum,
+    Cube
+}
+
 #[derive(Debug, Clone, PartialEq)]
-pub struct Primary {
+pub struct ArrayData {
     pub fitsblocks: Vec<[u8; 2880]>,
     bitpix: i8,
     naxis: u8,
     naxisn: Vec<usize>,
+    pcount: usize,
+    gcount: usize,
 }
 
-impl Primary {
-    pub fn new(fitsblocks: &Vec<[u8; 2880]>, header: &Header) -> Primary {
+impl ArrayData {
+    pub fn new(fitsblocks: &Vec<[u8; 2880]>, header: &header::Header, pcount: Option<usize>, gcount:Option<usize>) -> ArrayData {
         let bitpix = header.get_keyword("BITPIX").unwrap().parse::<i8>().unwrap();
         let naxis = header.get_keyword("NAXIS").unwrap().parse::<u8>().unwrap();
         let mut naxisn: Vec<usize> = Vec::new();
@@ -26,16 +33,28 @@ impl Primary {
                 .unwrap();
             naxisn.push(naxisn_i);
         }
-        Primary {
+        let pcount = match pcount {
+            Some(pcount) => pcount as usize,
+            None => 0,
+        };
+        let gcount = match gcount {
+            Some(gcount) => gcount as usize,
+            None => 1,
+        };
+        ArrayData {
             fitsblocks: fitsblocks.to_vec(),
             bitpix,
             naxis,
             naxisn,
+            pcount,
+            gcount
         }
     }
 
-    pub fn n_bytes(&self) -> usize {
-        (self.bitpix.abs() as usize) * (self.naxisn.iter().product::<usize>()) / 8 / (self.bitpix.abs() as usize / 8)
+    pub fn n_bits(&self) -> usize {
+        (self.bitpix.abs() as usize)
+            * self.gcount
+            * (self.pcount + self.naxisn.iter().product::<usize>())
     }
 
     pub fn format_data(&self) -> Array<Precision, ndarray::IxDyn> {
@@ -86,6 +105,6 @@ impl Primary {
                 panic!("Unsupported bitpix value: {}", self.bitpix);
             }
         }
-        Array::from_shape_vec(self.naxisn.clone(), local_vec[..self.n_bytes()].to_vec()).unwrap()
+        Array::from_shape_vec(self.naxisn.clone(), local_vec).unwrap()
     }
 }
