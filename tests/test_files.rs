@@ -1,4 +1,4 @@
-use rustfits::data::data::Data::{ASCIITable, BinaryTable, Primary};
+use rustfits::data::data::Data::{ASCIITable, BinaryTable, Primary, Array};
 use rustfits::fits::{FITS, HDU};
 use std::fs::File;
 use std::io;
@@ -52,9 +52,12 @@ fn test_euv() -> io::Result<()> {
         );
         // println!("Data: {:?}\n", fits.hdus[i].data);
     }
-    match &fits.hdus[5].data {
+    match &fits.hdus[3].data {
         BinaryTable(table) => {
             table.format_data();
+        }
+        Array(data) => {
+            println!("Array: {:?}", data.format_data().into_dimensionality::<ndarray::Ix2>().unwrap()[[3, 0]].to_f64());
         }
         _ => {
             println!("Not an BinaryTable");
