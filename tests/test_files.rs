@@ -16,7 +16,7 @@ fn test_wfpc2() -> io::Result<()> {
             "Keyword: NAXIS Value: {}",
             fits.hdus[i].header.get_keyword("NAXIS").unwrap()
         );
-        println!("Data: {:?}\n", fits.hdus[i].data);
+        // println!("Data: {:?}\n", fits.hdus[i].data);
     }
     match &fits.hdus[0].data{
         Primary(data) => {
