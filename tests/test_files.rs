@@ -1,4 +1,4 @@
-use rustfits::data::data::Data::{ASCIITable, BinaryTable, Primary, Array};
+use rustfits::data::data::Data::{ASCIITable, BinaryTable, Array};
 use rustfits::fits::{FITS, HDU};
 use std::fs::File;
 use std::io;
@@ -19,11 +19,11 @@ fn test_wfpc2() -> io::Result<()> {
         // println!("Data: {:?}\n", fits.hdus[i].data);
     }
     match &fits.hdus[0].data{
-        Primary(data) => {
+        Array(data) => {
             data.format_data();
         }
         _ => {
-            println!("Not a Primary");
+            println!("Not a Array");
         }
     }
     match &fits.hdus[1].data {

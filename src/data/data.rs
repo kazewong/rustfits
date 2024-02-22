@@ -89,7 +89,6 @@ pub struct Empty {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Data {
     Empty(Empty),
-    Primary(array::ArrayData),
     Array(array::ArrayData),
     ASCIITable(tables::ASCIITable),
     BinaryTable(tables::BinaryTable),
@@ -107,7 +106,6 @@ impl Data {
     pub fn append(&mut self, chunk: [u8; 2880]) {
         match self {
             Data::Empty(empty) => empty.fitsblocks.push(chunk),
-            Data::Primary(primary) => primary.fitsblocks.push(chunk),
             Data::Array(array) => array.fitsblocks.push(chunk),
             Data::ASCIITable(ascii_table) => ascii_table.fitsblocks.push(chunk),
             Data::BinaryTable(binary_table) => binary_table.fitsblocks.push(chunk),
@@ -117,7 +115,7 @@ impl Data {
     pub fn from_header(fitsblocks: &Vec<[u8; 2880]>, header: &header::Header) -> Data {
         let header_type = header.get_header_type();
         match header_type {
-            header::HeaderType::Primary => Data::Primary(array::ArrayData::new(fitsblocks, header, Some(0), Some(1))),
+            header::HeaderType::Primary => Data::Array(array::ArrayData::new(fitsblocks, header, Some(0), Some(1))),
             header::HeaderType::Image => Data::Array(array::ArrayData::new(fitsblocks, header, Some(0), Some(1))),
             header::HeaderType::ASCIITable => {
                 Data::ASCIITable(tables::ASCIITable::new(fitsblocks, header))
@@ -131,7 +129,6 @@ impl Data {
     pub fn get_fitsblocks(&self) -> &Vec<[u8; 2880]> {
         match self {
             Data::Empty(empty) => &empty.fitsblocks,
-            Data::Primary(primary) => &primary.fitsblocks,
             Data::Array(array) => &array.fitsblocks,
             Data::ASCIITable(ascii_table) => &ascii_table.fitsblocks,
             Data::BinaryTable(binary_table) => &binary_table.fitsblocks,
